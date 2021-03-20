@@ -24,7 +24,7 @@ class _MapState extends State<Mapp> {
   void initState() {
     geoService.getCurrentLocation().listen((position) {
       centerScreen(position);
-      json.save("LAT",position.latitude.toString(),"LNG",position.longitude.toString());
+      json.writeToFile(position.latitude.toString(),position.longitude.toString());
 
 
     });
