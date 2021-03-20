@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:x/services/geolocator_service.dart';
+import 'package:x/jsonFiles/jsonFile.dart';
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
@@ -17,12 +18,15 @@ class _MapState extends State<Mapp> {
   final GeolocatorService geoService = GeolocatorService();
   Completer<GoogleMapController> _controller = Completer();
   MapType _defaultMapType = MapType.normal;
-
+  final Json json = Json();
 
   @override
   void initState() {
     geoService.getCurrentLocation().listen((position) {
       centerScreen(position);
+      json.save(position.latitude.toString());
+      print("position = "+position.latitude.toString());
+
     });
     super.initState();
 
