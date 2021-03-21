@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:x/services/geolocator_service.dart';
-import 'package:x/jsonFiles/jsonFile.dart';
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
@@ -18,19 +20,49 @@ class _MapState extends State<Mapp> {
   final GeolocatorService geoService = GeolocatorService();
   Completer<GoogleMapController> _controller = Completer();
   MapType _defaultMapType = MapType.normal;
-  final Json json = Json();
+  File jsonFile;
+  Directory dir;
+  String fileName = "myFile.json";
+  bool fileExists = false;
+  Map<String, dynamic> fileContent;
 
   @override
   void initState() {
-    geoService.getCurrentLocation().listen((position) {
-      centerScreen(position);
-      json.writeToFile(position.latitude.toString(),position.longitude.toString());
-
-
+    getApplicationDocumentsDirectory().then((Directory directory) {
+      dir = directory;
+      jsonFile = new File(dir.path + "/" + fileName);
+      fileExists = jsonFile.existsSync();
     });
-    super.initState();
+    geoService.getCurrentLocation().listen((position) {centerScreen(position);
+    writeToFile('LAT', position.latitude.toString());
+    });
 
+    super.initState();
   }
+
+  void createFile(Map<String, dynamic> content, Directory dir, String fileName) {
+    print("Creating file!");
+    File file = new File(dir.path + "/" + fileName);
+    file.createSync();
+    fileExists = true;
+    file.writeAsStringSync(json.encode(content));
+  }
+
+  void writeToFile(String key, dynamic value) {
+    print("Writing to file!");
+    Map<String, dynamic> content = {key: value};
+    if (fileExists) {
+      print("File exists");
+      Map<String, dynamic> jsonFileContent = json.decode(jsonFile.readAsStringSync());
+      jsonFileContent.addAll(content);
+      jsonFile.writeAsStringSync(json.encode(jsonFileContent),mode: FileMode.append);
+    } else {
+      print("File does not exist!");
+      createFile(content, dir, fileName);
+    }
+  }
+
+
 
   void _changeMapType() {
     setState(() {
