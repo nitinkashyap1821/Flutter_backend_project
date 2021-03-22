@@ -25,43 +25,42 @@ class _MapState extends State<Mapp> {
   String fileName = "myFile.json";
   bool fileExists = false;
   Map<String, dynamic> fileContent;
+  Position position;
 
   @override
   void initState() {
     getApplicationDocumentsDirectory().then((Directory directory) {
       dir = directory;
       jsonFile = new File(dir.path + "/" + fileName);
+      jsonFile.createSync();
       fileExists = jsonFile.existsSync();
     });
     geoService.getCurrentLocation().listen((position) {centerScreen(position);
-    writeToFile('LAT', position.latitude.toString());
+    writeToFile('LAT', position.latitude.toString(),'LNG',position.longitude.toString());
+
     });
 
     super.initState();
   }
 
-  void createFile(Map<String, dynamic> content, Directory dir, String fileName) {
-    print("Creating file!");
-    File file = new File(dir.path + "/" + fileName);
-    file.createSync();
-    fileExists = true;
-    file.writeAsStringSync(json.encode(content));
-  }
 
-  void writeToFile(String key, dynamic value) {
+  void writeToFile(String key1, dynamic value1,String key2, dynamic value2) {
+    var timeNow = DateTime.now().microsecondsSinceEpoch;
+    print(timeNow);
     print("Writing to file!");
-    Map<String, dynamic> content = {key: value};
+    Map<String, dynamic> content = new Map();
+    var content1 = {key1: value1};
+    var content2 = {key2: value2};
+    var content3 = {"Time": timeNow};
     if (fileExists) {
       print("File exists");
-      Map<String, dynamic> jsonFileContent = json.decode(jsonFile.readAsStringSync());
-      jsonFileContent.addAll(content);
-      jsonFile.writeAsStringSync(json.encode(jsonFileContent),mode: FileMode.append);
-    } else {
-      print("File does not exist!");
-      createFile(content, dir, fileName);
+      content.addAll(content1);
+      content.addAll(content2);
+      content.addAll(content3);
+      print(content);
+      jsonFile.writeAsStringSync(json.encode(content),mode: FileMode.append);
     }
   }
-
 
 
   void _changeMapType() {
