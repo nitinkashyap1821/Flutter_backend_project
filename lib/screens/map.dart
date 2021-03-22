@@ -24,8 +24,6 @@ class _MapState extends State<Mapp> {
   Directory dir;
   String fileName = "myFile.json";
   bool fileExists = false;
-  Map<String, dynamic> fileContent;
-  Position position;
 
   @override
   void initState() {
