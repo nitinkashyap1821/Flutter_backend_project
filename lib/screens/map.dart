@@ -60,10 +60,7 @@ class _MapState extends State<Mapp> {
         jsonFile.writeAsStringSync('[\n'+jsonEncode(dict)+'\n]',mode: FileMode.append);
       }
       else{
-        jsonFile.readAsLines().then((List<String> lines){
-
-          jsonFile.writeAsStringSync(',\n' + jsonEncode(dict)+'\n]',mode: FileMode.append);
-        });
+        jsonFile.writeAsStringSync(',\n' + jsonEncode(dict)+'\n]',mode: FileMode.append);
       }
     }
   }
