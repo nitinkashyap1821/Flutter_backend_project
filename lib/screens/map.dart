@@ -25,7 +25,6 @@ class _MapState extends State<Mapp> {
       centerScreen(position);
     });
     super.initState();
-
   }
 
   void _changeMapType() {
