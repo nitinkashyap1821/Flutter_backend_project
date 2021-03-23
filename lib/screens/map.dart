@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:x/services/geolocator_service.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
@@ -22,6 +23,8 @@ class _MapState extends State<Mapp> {
   Directory dir;
   String fileName = "myFile.json";
   bool fileExists = false;
+  double _heading = 0;
+  String get _readout => _heading.toStringAsFixed(0) + '°';
 
   @override
   void initState() {
@@ -32,29 +35,36 @@ class _MapState extends State<Mapp> {
       fileExists = jsonFile.existsSync();
     });
     geoService.getCurrentLocation().listen((position) {centerScreen(position);
-    writeToFile('LAT', position.latitude.toString(),'LNG',position.longitude.toString());
-
+    FlutterCompass.events.listen(_onData);
+    writeToFile(position.latitude.toString(),position.longitude.toString(),_readout);
     });
-
     super.initState();
   }
 
 
-  void writeToFile(String key1, dynamic value1,String key2, dynamic value2) {
+  void _onData(double x) => setState(() { _heading = x; });
+
+  void writeToFile(dynamic value1, dynamic value2,dynamic value3) {
+    print("Writing to file!");
+    print('read = '+ _readout);
     var timeNow = DateTime.now().microsecondsSinceEpoch;
     print(timeNow);
-    print("Writing to file!");
-    Map<String, dynamic> content = new Map();
-    var content1 = {key1: value1};
-    var content2 = {key2: value2};
-    var content3 = {"Time": timeNow};
-    if (fileExists) {
+    var dict = {};
+    dict['LAT'] = value1;
+    dict['LNG'] = value2;
+    dict['TIME'] = timeNow;
+    dict['DIRECTION'] = value3;
+        if (fileExists) {
       print("File exists");
-      content.addAll(content1);
-      content.addAll(content2);
-      content.addAll(content3);
-      print(content);
-      jsonFile.writeAsStringSync(json.encode(content),mode: FileMode.append);
+      if(jsonFile.lengthSync() == 0){
+        jsonFile.writeAsStringSync('[\n'+jsonEncode(dict)+'\n]',mode: FileMode.append);
+      }
+      else{
+        jsonFile.readAsLines().then((List<String> lines){
+
+          jsonFile.writeAsStringSync(',\n' + jsonEncode(dict)+'\n]',mode: FileMode.append);
+        });
+      }
     }
   }
 
