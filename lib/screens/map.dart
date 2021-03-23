@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:x/services/geolocator_service.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
@@ -17,15 +18,21 @@ class _MapState extends State<Mapp> {
   final GeolocatorService geoService = GeolocatorService();
   Completer<GoogleMapController> _controller = Completer();
   MapType _defaultMapType = MapType.normal;
+  double _heading = 0;
+  String get _readout => _heading.toStringAsFixed(0) + '°';
 
 
   @override
   void initState() {
     geoService.getCurrentLocation().listen((position) {
       centerScreen(position);
+      FlutterCompass.events.listen(_onData);
+      print('read = '+ _readout);
     });
     super.initState();
   }
+
+  void _onData(double x) => setState(() { _heading = x; });
 
   void _changeMapType() {
     setState(() {
