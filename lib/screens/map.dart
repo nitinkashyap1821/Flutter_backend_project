@@ -9,9 +9,7 @@ import 'package:x/services/geolocator_service.dart';
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
-
   Mapp(this.initialPosition);
-
   @override
   State<StatefulWidget> createState() => _MapState();
 }
