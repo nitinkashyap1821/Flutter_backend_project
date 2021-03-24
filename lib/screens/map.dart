@@ -25,6 +25,7 @@ class _MapState extends State<Mapp> {
   bool fileExists = false;
   double _heading = 0;
   String get _readout => _heading.toStringAsFixed(0) + '°';
+  List<Map<String, dynamic>> _values = List<Map<String, dynamic>>.empty(growable: true);
 
   @override
   void initState() {
@@ -49,21 +50,14 @@ class _MapState extends State<Mapp> {
     print('read = '+ _readout);
     var timeNow = DateTime.now().microsecondsSinceEpoch;
     print(timeNow);
-    var dict = {};
-    dict['LAT'] = value1;
-    dict['LNG'] = value2;
-    dict['TIME'] = timeNow;
-    dict['DIRECTION'] = value3;
-        if (fileExists) {
-      print("File exists");
-      if(jsonFile.lengthSync() == 0){
-        jsonFile.writeAsStringSync('[\n'+jsonEncode(dict)+'\n]',mode: FileMode.append);
-      }
-      else{
-        //jsonFile.readAsStringSync();
-        jsonFile.writeAsStringSync(',\n' + jsonEncode(dict)+'\n]',mode: FileMode.append);
-      }
-    }
+    Map<String, dynamic> _value = {
+           'LAT' : value1,
+            'LNG' : value2,
+            'TIME' : timeNow,
+            'DIRECTION' : _readout
+    };
+    _values.add(_value);
+    jsonFile.writeAsStringSync(jsonEncode(_value),mode: FileMode.writeOnly);
   }
 
 
