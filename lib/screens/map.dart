@@ -57,7 +57,7 @@ class _MapState extends State<Mapp> {
             'DIRECTION' : _readout
     };
     _values.add(_value);
-    jsonFile.writeAsStringSync(jsonEncode(_value),mode: FileMode.writeOnly);
+    jsonFile.writeAsStringSync(jsonEncode(_values),mode: FileMode.writeOnly);
   }
 
 
