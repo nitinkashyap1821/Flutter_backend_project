@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:x/services/geolocator_service.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
+
 class Mapp extends StatefulWidget {
   final Position initialPosition;
   Mapp(this.initialPosition);
@@ -51,10 +52,10 @@ class _MapState extends State<Mapp> {
     var timeNow = DateTime.now().microsecondsSinceEpoch;
     print(timeNow);
     Map<String, dynamic> _value = {
-           'LAT' : value1,
-            'LNG' : value2,
-            'TIME' : timeNow,
-            'DIRECTION' : _readout
+      'LAT' : value1,
+      'LNG' : value2,
+      'TIME' : timeNow,
+      'DIRECTION' : _readout
     };
     _values.add(_value);
     jsonFile.writeAsStringSync(jsonEncode(_values),mode: FileMode.writeOnly);
@@ -72,38 +73,38 @@ class _MapState extends State<Mapp> {
     return Scaffold(
       appBar: AppBar(
         title :Center(child:Text('Maps'),
-      ),
+        ),
       ),
       body: Container(
         child: Stack(
-            children:[GoogleMap(
-          initialCameraPosition: CameraPosition(
-              target: LatLng(widget.initialPosition.latitude,
-                  widget.initialPosition.longitude),
-              zoom: 13.0),
-          mapType: _defaultMapType,
-          compassEnabled: true,
-          myLocationEnabled: true,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-        ),
-          Container(
-                    margin: EdgeInsets.only(top: 80, right: 10),
-                    alignment: Alignment.topRight,
-                    child: Column(
-                                  children: [
-                                        FloatingActionButton(
-                                                              child: Icon(Icons.layers),
-                                                              elevation: 10,
-                                                              backgroundColor: Colors.blue,
-                                                              onPressed:_changeMapType
-                                        ),
-                                        ],
-                    ),
+          children:[GoogleMap(
+            initialCameraPosition: CameraPosition(
+                target: LatLng(widget.initialPosition.latitude,
+                    widget.initialPosition.longitude),
+                zoom: 13.0),
+            mapType: _defaultMapType,
+            compassEnabled: true,
+            myLocationEnabled: true,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
           ),
-        ],
-      ),
+            Container(
+              margin: EdgeInsets.only(top: 80, right: 10),
+              alignment: Alignment.topRight,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                      child: Icon(Icons.layers),
+                      elevation: 10,
+                      backgroundColor: Colors.blue,
+                      onPressed:_changeMapType
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
