@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:x/services/geolocator_service.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:sensors/sensors.dart';
 
 
 class Mapp extends StatefulWidget {
@@ -81,7 +82,7 @@ class _MapState extends State<Mapp> {
             initialCameraPosition: CameraPosition(
                 target: LatLng(widget.initialPosition.latitude,
                     widget.initialPosition.longitude),
-                zoom: 13.0),
+                zoom: 17.5),
             mapType: _defaultMapType,
             compassEnabled: true,
             myLocationEnabled: true,
@@ -112,6 +113,6 @@ class _MapState extends State<Mapp> {
   Future<void> centerScreen(Position position) async {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(position.latitude, position.longitude), zoom: 18.0)));
+        target: LatLng(position.latitude, position.longitude), zoom: 17.5)));
   }
 }
