@@ -26,7 +26,7 @@ class _MapState extends State<Mapp> {
   String fileName = "myFile.json";
   bool fileExists = false;
   double _heading = 0;
-  String get _readout => _heading.toStringAsFixed(0) + '°';
+  String get _compassreadout => _heading.toStringAsFixed(0) + '°';
   List<Map<String, dynamic>> _values = List<Map<String, dynamic>>.empty(growable: true);
 
   @override
@@ -39,7 +39,10 @@ class _MapState extends State<Mapp> {
     });
     geoService.getCurrentLocation().listen((position) {centerScreen(position);
     FlutterCompass.events.listen(_onData);
-    writeToFile(position.latitude.toString(),position.longitude.toString(),_readout);
+    userAccelerometerEvents.listen((UserAccelerometerEvent accelerometerevent){
+      writeToFile(position.latitude.toDouble(),position.longitude.toDouble(),position.altitude.toDouble(),position.speed.toDouble(),_compassreadout,accelerometerevent);
+    });
+
     });
     super.initState();
   }
@@ -47,16 +50,15 @@ class _MapState extends State<Mapp> {
 
   void _onData(double x) => setState(() { _heading = x; });
 
-  void writeToFile(dynamic value1, dynamic value2,dynamic value3) {
-    print("Writing to file!");
-    print('read = '+ _readout);
-    var timeNow = DateTime.now().microsecondsSinceEpoch;
-    print(timeNow);
+  void writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic _compassread, dynamic accelerometerevent) {
     Map<String, dynamic> _value = {
-      'LAT' : value1,
-      'LNG' : value2,
-      'TIME' : timeNow,
-      'DIRECTION' : _readout
+      'LAT' : _lat,
+      'LNG' : _lng,
+      'ALT' : _alt,
+      'SPEED' : speed,
+      'TIME' : DateTime.now().microsecondsSinceEpoch,
+      'DIRECTION' : _compassread,
+      'Accelerometer' : {'x':accelerometerevent.x, 'y':accelerometerevent.y, 'z':accelerometerevent.z}
     };
     _values.add(_value);
     jsonFile.writeAsStringSync(jsonEncode(_values),mode: FileMode.writeOnly);
