@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:x/services/geolocator_service.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:x/services/geolocator_service.dart';
 import 'package:sensors/sensors.dart';
+
+
 
 
 class Mapp extends StatefulWidget {
@@ -26,7 +28,7 @@ class _MapState extends State<Mapp> {
   String fileName = "myFile.json";
   bool fileExists = false;
   double _heading = 0;
-  String get _compassreadout => _heading.toStringAsFixed(0) + '°';
+  String get _compassreading => _heading.toStringAsFixed(0) + '°';
   List<Map<String, dynamic>> _values = List<Map<String, dynamic>>.empty(growable: true);
 
   @override
@@ -40,24 +42,22 @@ class _MapState extends State<Mapp> {
     geoService.getCurrentLocation().listen((position) {centerScreen(position);
     FlutterCompass.events.listen(_onData);
     userAccelerometerEvents.listen((UserAccelerometerEvent accelerometerevent){
-      writeToFile(position.latitude.toDouble(),position.longitude.toDouble(),position.altitude.toDouble(),position.speed.toDouble(),_compassreadout,accelerometerevent);
+    writeToFile(position.latitude.toDouble(),position.longitude.toDouble(),position.altitude.toDouble(),position.speed.toDouble(),_compassreading,accelerometerevent);
     });
-
     });
     super.initState();
   }
 
-
   void _onData(double x) => setState(() { _heading = x; });
 
-  void writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic _compassread, dynamic accelerometerevent) {
+  void writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic _compassreading,dynamic accelerometerevent) {
     Map<String, dynamic> _value = {
       'LAT' : _lat,
       'LNG' : _lng,
       'ALT' : _alt,
       'SPEED' : speed,
       'TIME' : DateTime.now().microsecondsSinceEpoch,
-      'DIRECTION' : _compassread,
+      'DIRECTION' : _compassreading,
       'Accelerometer' : {'x':accelerometerevent.x, 'y':accelerometerevent.y, 'z':accelerometerevent.z}
     };
     _values.add(_value);
