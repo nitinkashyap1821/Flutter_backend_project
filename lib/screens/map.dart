@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,9 +8,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:x/services/geolocator_service.dart';
 import 'package:sensors/sensors.dart';
-
-
-
 
 class Mapp extends StatefulWidget {
   final Position initialPosition;
@@ -59,6 +55,7 @@ class _MapState extends State<Mapp> {
     _streamController.close();
     _stream.close();
   }
+
   void _onData(double x) => setState(() { _heading = x; });
 
   Future<void> writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic _compassreadout,dynamic accelerometerevent) async {
