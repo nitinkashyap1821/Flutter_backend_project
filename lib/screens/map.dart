@@ -30,6 +30,9 @@ class _MapState extends State<Mapp> {
   final StreamController _stream6y = StreamController();
   final StreamController _stream6z = StreamController();
   final StreamController _stream7 = StreamController();
+  final StreamController _streamYaw = StreamController();
+  final StreamController _streampitch = StreamController();
+  final StreamController _streamroll = StreamController();
   Light _light = new Light();
 
   File jsonFile;
@@ -40,9 +43,12 @@ class _MapState extends State<Mapp> {
   double _heading = 0;
   String get compass => _heading.toStringAsFixed(0) + '°';
   int get luminanceRead => _luminance;
-  String _temp = "";
-  UserAccelerometerEvent accelerometerEvent;
+  String _temp = " ";
   List<Map<String, dynamic>> _values = List<Map<String, dynamic>>.empty(growable: true);
+  double _x=0.0,_z=0.0,_y=0.0;
+  double _yaw=0.0,_pitch=0.0,_roll=0.0;
+  double get x => _x;double get y => _y;double get z => _z;
+  double get yaw => _yaw;double get pitch => _pitch;double get roll => _roll;
 
 
   @override
@@ -66,14 +72,15 @@ class _MapState extends State<Mapp> {
 
     _light.lightSensorStream.listen(_lightEvent);
     _stream4.sink.add(luminanceRead);
-
     _stream7.sink.add(_temp);
 
-    motionSensors.userAccelerometer.listen((UserAccelerometerEvent accelerometerEvent) {
-      _stream6x.sink.add(accelerometerEvent.x);
-      _stream6y.sink.add(accelerometerEvent.y);
-      _stream6z.sink.add(accelerometerEvent.z);
+    motionSensors.userAccelerometer.listen(_accelerometerEvent);
+      _stream6x.sink.add(x);
+      _stream6y.sink.add(y);
+      _stream6z.sink.add(z);
 
+    motionSensors.absoluteOrientation.listen(_absoluteOrientationEvent);
+    _streamYaw.sink.add(yaw);_streamroll.sink.add(roll);_streampitch.sink.add(pitch);
 
     writeToFile(
         position.latitude,
@@ -81,12 +88,10 @@ class _MapState extends State<Mapp> {
         position.altitude,
         position.speed,
         compass,
-        accelerometerEvent,
+        x,y,z,yaw,pitch,roll,
         luminanceRead,
         _temp);
     });
-    });
-
     super.initState();
   }
 
@@ -103,10 +108,27 @@ class _MapState extends State<Mapp> {
     _stream6y.close();
     _stream6z.close();
     _stream7.close();
+    _streamYaw.close();
+    _streampitch.close();
+    _streamroll.close();
   }
 
   void _onData(double x) => setState(() { _heading = x; });
   void _lightEvent(int z) => setState(() {_luminance = z; });
+  void _accelerometerEvent(UserAccelerometerEvent a){
+    setState(() {
+      _x = a.x;
+      _y = a.y;
+      _z = a.z;
+    });
+  }
+  _absoluteOrientationEvent(AbsoluteOrientationEvent b){
+    setState(() {
+      _yaw = b.yaw;
+      _pitch = b.pitch;
+      _roll = b.roll;
+    });
+  }
   initDeviceTemperature() async {
     double g;
     try {
@@ -120,7 +142,7 @@ class _MapState extends State<Mapp> {
     });
   }
 
-  Future<void> writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic compassReadout,dynamic accelerometerEvent,dynamic lux,dynamic temp) async {
+  Future<void> writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic compassReadout,dynamic xAxis,dynamic yAxis,dynamic zAxis,dynamic yaw,dynamic pitch,dynamic roll,dynamic lux,dynamic temp) async {
 
     Map<String, dynamic> _value = {
       'LAT' : _lat,
@@ -129,7 +151,8 @@ class _MapState extends State<Mapp> {
       'SPEED' : speed,
       'TIME' : DateTime.now().microsecondsSinceEpoch,
       'DIRECTION' : compassReadout,
-      'Accelerometer' : {'x':accelerometerEvent.x, 'y':accelerometerEvent.y, 'z':accelerometerEvent.z},
+      'Accelerometer' : {'x':xAxis, 'y':yAxis, 'z':zAxis},
+      'Orientation' : {'yaw' : yaw,'pitch':pitch,'roll':roll},
       'Lux' : lux,
       'temp' : temp
     };
@@ -264,6 +287,45 @@ class _MapState extends State<Mapp> {
                     return Text("temp: - ");
                   return Align(alignment: Alignment(0,.5),
                     child:Text("temp:${snapshot.data} °C"),
+
+                  );
+                },
+              ),
+            ),
+            Container(
+              child: StreamBuilder(
+                stream: _streamYaw.stream,
+                builder: (context, snapshot){
+                  if(snapshot.hasError)
+                    return Text("yaw: - ");
+                  return Align(alignment: Alignment(0,.45),
+                    child:Text("yaw:${snapshot.data}"),
+
+                  );
+                },
+              ),
+            ),
+            Container(
+              child: StreamBuilder(
+                stream: _streampitch.stream,
+                builder: (context, snapshot){
+                  if(snapshot.hasError)
+                    return Text("pitch: - ");
+                  return Align(alignment: Alignment(0,.4),
+                    child:Text("pitch:${snapshot.data}"),
+
+                  );
+                },
+              ),
+            ),
+            Container(
+              child: StreamBuilder(
+                stream: _streamroll.stream,
+                builder: (context, snapshot){
+                  if(snapshot.hasError)
+                    return Text("roll: - ");
+                  return Align(alignment: Alignment(0,.35),
+                    child:Text("roll:${snapshot.data}"),
 
                   );
                 },
