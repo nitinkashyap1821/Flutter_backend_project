@@ -9,6 +9,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:x/services/geolocator_service.dart';
 import 'package:light/light.dart';
 import 'package:motion_sensors/motion_sensors.dart';
+import 'package:battery/battery.dart';
 
 void main() => runApp(MaterialApp(
     home:Mapp(),
@@ -36,7 +37,9 @@ class _MapState extends State<Mapp> {
   final StreamController _streamYaw = StreamController();
   final StreamController _streampitch = StreamController();
   final StreamController _streamroll = StreamController();
+  final StreamController _streamBattery = StreamController();
   Light _light = new Light();
+  var _battery = Battery();
 
   File jsonFile;
   Directory dir;
@@ -46,14 +49,12 @@ class _MapState extends State<Mapp> {
   double _heading = 0;
   String get compass => _heading.toStringAsFixed(0) + '°';
   int get luminanceRead => _luminance;
-  String _temp = " ";
+  String _temp = "";
   List<Map<String, dynamic>> _values = List<Map<String, dynamic>>.empty(growable: true);
   double _x=0.0,_z=0.0,_y=0.0;
   double _yaw=0.0,_pitch=0.0,_roll=0.0;
   double get x => _x;double get y => _y;double get z => _z;
   double get yaw => _yaw;double get pitch => _pitch;double get roll => _roll;
-  double _angle = 0.0;
-  double get angleData => _angle;
 
 
   @override
@@ -67,7 +68,7 @@ class _MapState extends State<Mapp> {
 
     Timer.periodic(Duration(seconds: 5), (timer) {initDeviceTemperature();});
 
-    geoService.getCurrentLocation().listen((Position position) {
+    geoService.getCurrentLocation().listen((Position position) async {
       _stream1.sink.add(position.latitude.toString());
       _stream2.sink.add(position.longitude.toString());
       _stream3.sink.add(position.altitude.toString());
@@ -84,6 +85,9 @@ class _MapState extends State<Mapp> {
       _stream6y.sink.add(y);
       _stream6z.sink.add(z);
 
+      _streamBattery.sink.add(await _battery.batteryLevel);
+      int battery = await _battery.batteryLevel;
+
       motionSensors.absoluteOrientation.listen(_absoluteOrientationEvent);
       _streamYaw.sink.add(yaw);_streamroll.sink.add(roll);_streampitch.sink.add(pitch);
 
@@ -95,7 +99,8 @@ class _MapState extends State<Mapp> {
           compass,
           x,y,z,yaw,pitch,roll,
           luminanceRead,
-          _temp);
+          _temp,
+          battery);
     });
     super.initState();
   }
@@ -116,6 +121,7 @@ class _MapState extends State<Mapp> {
     _streamYaw.close();
     _streampitch.close();
     _streamroll.close();
+    _streamBattery.close();
   }
 
   void _onData(double x) => setState(() { _heading = x; });
@@ -147,7 +153,7 @@ class _MapState extends State<Mapp> {
     });
   }
 
-  Future<void> writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic compassReadout,dynamic xAxis,dynamic yAxis,dynamic zAxis,dynamic yaw,dynamic pitch,dynamic roll,dynamic lux,dynamic temp) async {
+  Future<void> writeToFile(dynamic _lat, dynamic _lng,dynamic _alt,dynamic speed, dynamic compassReadout,dynamic xAxis,dynamic yAxis,dynamic zAxis,dynamic yaw,dynamic pitch,dynamic roll,dynamic lux,dynamic temp,dynamic batteryLevel) async {
 
     Map<String, dynamic> _value = {
       'LAT' : _lat,
@@ -159,7 +165,8 @@ class _MapState extends State<Mapp> {
       'Accelerometer' : {'x':xAxis, 'y':yAxis, 'z':zAxis},
       'Orientation' : {'yaw' : yaw,'pitch':pitch,'roll':roll},
       'Lux' : lux,
-      'temp' : temp
+      'temp' : temp,
+      'battery': batteryLevel
     };
     if(_values.length>110){
       _values.clear();
@@ -180,6 +187,19 @@ class _MapState extends State<Mapp> {
       body: Container(
         child: Stack(
           children:[
+            Container(
+              child: StreamBuilder(
+                stream: _streamBattery.stream,
+                builder: (context, snapshot){
+                  if(snapshot.hasError)
+                    return Text("battery: - ");
+                  return Align(alignment: Alignment(0,.3),
+                    child:Text("battery:${snapshot.data}"),
+
+                  );
+                },
+              ),
+            ),
             Container(
               child: StreamBuilder(
                 stream: _stream1.stream,
@@ -339,6 +359,7 @@ class _MapState extends State<Mapp> {
           ],
         ),
       ),
+
     );
   }
 }
