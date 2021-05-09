@@ -10,6 +10,11 @@ import 'package:x/services/geolocator_service.dart';
 import 'package:light/light.dart';
 import 'package:motion_sensors/motion_sensors.dart';
 import 'package:battery/battery.dart';
+//import 'package:usage_stats/usage_stats.dart';
+//import 'package:device_apps/device_apps.dart';
+import 'package:app_usage/app_usage.dart';
+
+
 
 void main() => runApp(MaterialApp(
     home:Mapp(),
@@ -107,7 +112,6 @@ class _MapState extends State<Mapp> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _stream1.close();
     _stream2.close();
@@ -187,6 +191,17 @@ class _MapState extends State<Mapp> {
       body: Container(
         child: Stack(
           children:[
+            Center(
+            child: ElevatedButton(
+              child: Text("app list"),
+                onPressed: () {
+                Navigator.push(
+                  context,
+                MaterialPageRoute(builder: (context) => UsageScreen()),
+                );
+                },
+            ),
+            ),
             Container(
               child: StreamBuilder(
                 stream: _streamBattery.stream,
@@ -360,6 +375,71 @@ class _MapState extends State<Mapp> {
         ),
       ),
 
+    );
+  }
+}
+
+
+class UsageScreen extends StatefulWidget {
+  @override
+  _UsageScreenState createState() => _UsageScreenState();
+}
+
+class _UsageScreenState extends State<UsageScreen> {
+  //List<UsageInfo> events = [];
+  //List installedApp = [];
+  List<AppUsageInfo> _infos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initUsage();
+    });
+  }
+
+  Future<void> initUsage() async {
+    //UsageStats.grantUsagePermission();
+    try {
+      DateTime endDate = new DateTime.now();
+      DateTime startDate = endDate.subtract(Duration(days: 1));
+      List<AppUsageInfo> infoList = await AppUsage.getAppUsage(startDate, endDate);
+      setState(() {
+        _infos = infoList;
+      });
+    } on AppUsageException catch (exception) {
+      print(exception);
+    }
+
+   /* List<UsageInfo> usageStats = await UsageStats.queryUsageStats(startDate, endDate);
+
+     List apps =
+    await DeviceApps.getInstalledApplications(
+        onlyAppsWithLaunchIntent: true,includeSystemApps: true);
+    this.setState(() {
+      events =usageStats.toList();
+      installedApp = apps.toList();
+    });*/
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Usage Stats"),
+        ),
+        body: ListView.builder(
+          itemCount: _infos.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+                title: Text(_infos[index].packageName),
+                subtitle: Text(_infos[index].appName),
+                trailing: Text(_infos[index].usage.toString()));
+          }),
+      floatingActionButton: FloatingActionButton(
+          onPressed: initUsage, child: Icon(Icons.refresh)),
+    ),
     );
   }
 }
