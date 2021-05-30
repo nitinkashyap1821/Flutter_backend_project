@@ -32,8 +32,8 @@ dependencies:
   motion_sensors: ^0.1.0
   battery: ^2.0.1
   app_usage: ^2.0.0
-  usage_stats: ^0.1.0
   device_apps: ^2.1.1
+  charts_flutter: ^0.10.0
 
 
   # The following adds the Cupertino Icons font to your application.

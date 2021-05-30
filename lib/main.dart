@@ -10,8 +10,7 @@ import 'package:x/services/geolocator_service.dart';
 import 'package:light/light.dart';
 import 'package:motion_sensors/motion_sensors.dart';
 import 'package:battery/battery.dart';
-//import 'package:usage_stats/usage_stats.dart';
-//import 'package:device_apps/device_apps.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:app_usage/app_usage.dart';
 
 
@@ -386,8 +385,6 @@ class UsageScreen extends StatefulWidget {
 }
 
 class _UsageScreenState extends State<UsageScreen> {
-  //List<UsageInfo> events = [];
-  //List installedApp = [];
   List<AppUsageInfo> _infos = [];
 
   @override
@@ -399,27 +396,21 @@ class _UsageScreenState extends State<UsageScreen> {
   }
 
   Future<void> initUsage() async {
-    //UsageStats.grantUsagePermission();
-    try {
-      DateTime endDate = new DateTime.now();
-      DateTime startDate = endDate.subtract(Duration(days: 1));
+    DateTime endDate = new DateTime.now();
+    DateTime presentDate = new DateTime.now();
+    DateTime startDate = DateTime(presentDate.year,presentDate.month,presentDate.day,0,0,0,1);
+
+    try{
       List<AppUsageInfo> infoList = await AppUsage.getAppUsage(startDate, endDate);
       setState(() {
         _infos = infoList;
       });
-    } on AppUsageException catch (exception) {
-      print(exception);
-    }
+    } on AppUsageException catch (exception) {print(exception);}
+  }
 
-   /* List<UsageInfo> usageStats = await UsageStats.queryUsageStats(startDate, endDate);
-
-     List apps =
-    await DeviceApps.getInstalledApplications(
-        onlyAppsWithLaunchIntent: true,includeSystemApps: true);
-    this.setState(() {
-      events =usageStats.toList();
-      installedApp = apps.toList();
-    });*/
+  Future<String> appNameProvider(pn) async {
+    Application apps = await DeviceApps.getApp(pn);
+    return apps.appName.toString();
   }
 
   @override
@@ -434,8 +425,18 @@ class _UsageScreenState extends State<UsageScreen> {
           itemBuilder: (context, index) {
             return ListTile(
                 title: Text(_infos[index].packageName),
-                subtitle: Text(_infos[index].appName),
-                trailing: Text(_infos[index].usage.toString()));
+                subtitle: FutureBuilder(
+                  future: appNameProvider(_infos[index].packageName.toString()),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                      return Text(snapshot.data);
+                    }
+                    return Text('No Data');
+                  },
+                ),
+                trailing:Text(_infos[index].usage.toString()),
+
+            );
           }),
       floatingActionButton: FloatingActionButton(
           onPressed: initUsage, child: Icon(Icons.refresh)),
