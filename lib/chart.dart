@@ -1,5 +1,6 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:app_usage/app_usage.dart';
+import 'package:device_apps/device_apps.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,7 @@ class AppUsagePerDay {
 class _MyHomePageState extends State<MyHomePage> {
   List<AppUsageInfo> _infos;
 
+
   @override
   void initState() {
     super.initState();
@@ -47,20 +49,22 @@ class _MyHomePageState extends State<MyHomePage> {
       List<AppUsageInfo> infoList = await AppUsage.getAppUsage(startDate, endDate);
       setState(() {
         _infos = infoList;
+        _infos.sort((a,b) => b.usage.inSeconds.compareTo(a.usage.inSeconds));
       });
     } on AppUsageException catch (exception) {print(exception);}
-    _infos.sort((a,b) => b.usage.inSeconds.compareTo(a.usage.inSeconds));
+  }
 
+  Future<String> appNameProvider(pn) async {
+    Application apps = await DeviceApps.getApp(pn);
+      return apps.appName.toString();
   }
 
   @override
   Widget build(BuildContext context){
-
     var data = [
-      AppUsagePerDay(_infos[0].appName, _infos[0].usage.inMinutes),
+      AppUsagePerDay(_infos[0].appName,_infos[0].usage.inMinutes),
       AppUsagePerDay(_infos[1].appName, _infos[1].usage.inMinutes),
-      AppUsagePerDay(_infos[2].appName, _infos[2].usage.inMinutes),
-      AppUsagePerDay(_infos[3].appName, _infos[3].usage.inMinutes),
+      AppUsagePerDay(_infos[9].appName, _infos[9].usage.inMinutes),
       AppUsagePerDay(_infos[4].appName, _infos[4].usage.inMinutes),
     ];
 
@@ -81,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var chartWidget = Padding(
       padding: EdgeInsets.all(32.0),
       child: SizedBox(
-        height: 200.0,
+        height: 350.0,
         child: chart,
       ),
     );

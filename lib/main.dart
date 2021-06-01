@@ -450,7 +450,7 @@ class _UsageScreenState extends State<UsageScreen> {
                   },
                 ),
                 subtitle: Text(_infos[index].packageName),
-                trailing:Text(_infos[index].usage.inMinutes.toString()),
+                trailing:Text(_infos[index].usage.inMinutes.toString()+" Mins"),
 
               );
             }),
