@@ -12,6 +12,7 @@ import 'package:motion_sensors/motion_sensors.dart';
 import 'package:battery/battery.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:app_usage/app_usage.dart';
+import 'package:x/chart.dart';
 
 
 
@@ -190,16 +191,30 @@ class _MapState extends State<Mapp> {
       body: Container(
         child: Stack(
           children:[
-            Center(
+            Align(
+              alignment: Alignment.centerRight,
             child: ElevatedButton(
-              child: Text("app list"),
+              child: Text("AppUsage Info with Chart"),
                 onPressed: () {
                 Navigator.push(
                   context,
-                MaterialPageRoute(builder: (context) => UsageScreen()),
+                MaterialPageRoute(builder: (context) => MyApp()),
                 );
                 },
             ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                child: Text("AppUsage Info"),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => UsageScreen()
+                    ),
+                  );
+                },
+              ),
             ),
             Container(
               child: StreamBuilder(
@@ -404,6 +419,7 @@ class _UsageScreenState extends State<UsageScreen> {
       List<AppUsageInfo> infoList = await AppUsage.getAppUsage(startDate, endDate);
       setState(() {
         _infos = infoList;
+        _infos.sort((a,b) => b.usage.inSeconds.compareTo(a.usage.inSeconds));
       });
     } on AppUsageException catch (exception) {print(exception);}
   }
@@ -421,26 +437,26 @@ class _UsageScreenState extends State<UsageScreen> {
           title: const Text("Usage Stats"),
         ),
         body: ListView.builder(
-          itemCount: _infos.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-                title: Text(_infos[index].packageName),
-                subtitle: FutureBuilder(
+            itemCount: _infos.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: FutureBuilder(
                   future: appNameProvider(_infos[index].packageName.toString()),
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
                       return Text(snapshot.data);
                     }
-                    return Text('No Data');
+                    return Text('');
                   },
                 ),
-                trailing:Text(_infos[index].usage.toString()),
+                subtitle: Text(_infos[index].packageName),
+                trailing:Text(_infos[index].usage.inMinutes.toString()),
 
-            );
-          }),
-      floatingActionButton: FloatingActionButton(
-          onPressed: initUsage, child: Icon(Icons.refresh)),
-    ),
+              );
+            }),
+        floatingActionButton: FloatingActionButton(
+            onPressed: initUsage, child: Icon(Icons.refresh)),
+      ),
     );
   }
 }
