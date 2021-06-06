@@ -15,7 +15,6 @@ import 'package:app_usage/app_usage.dart';
 import 'package:x/chart.dart';
 
 
-
 void main() => runApp(MaterialApp(
     home:Mapp(),
 ),
@@ -198,7 +197,7 @@ class _MapState extends State<Mapp> {
                 onPressed: () {
                 Navigator.push(
                   context,
-                MaterialPageRoute(builder: (context) => MyApp()),
+                MaterialPageRoute(builder: (context) => MyHomePage()),
                 );
                 },
             ),
@@ -427,6 +426,7 @@ class _UsageScreenState extends State<UsageScreen> {
   Future<String> appNameProvider(pn) async {
     Application apps = await DeviceApps.getApp(pn);
     return apps.appName.toString();
+
   }
 
   @override
@@ -449,13 +449,13 @@ class _UsageScreenState extends State<UsageScreen> {
                     return Text('');
                   },
                 ),
-                subtitle: Text(_infos[index].packageName),
-                trailing:Text(_infos[index].usage.inMinutes.toString()+" Mins"),
+                subtitle:Text("Time Spent is "+_infos[index].usage.toString().substring(0,7)),
 
               );
             }),
         floatingActionButton: FloatingActionButton(
-            onPressed: initUsage, child: Icon(Icons.refresh)),
+            onPressed: initUsage, child: Icon(Icons.refresh)
+        ),
       ),
     );
   }
