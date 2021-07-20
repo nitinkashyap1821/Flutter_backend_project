@@ -22,5 +22,7 @@ A few resources used in this Flutter project:
 For help getting started with Flutter, view 
 - [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-- [online documentation](https://flutter.dev/docs)<br>
+- [online documentation](https://flutter.dev/docs)
+
+<br>
 which offers tutorials, samples, guidance on mobile development, and a full API reference.
